@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoodMate AI 💙</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4ff;
+      color: #24304a;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 6px 25px #24304a15;
+    }
+    input, textarea, select, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #d4daea;
+      border-radius: 10px;
+      font: inherit;
+    }
+    button {
+      background: #5267d9;
+      color: white;
+      border: 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #reply {
+      background: #e7edff;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>💙 MoodMate AI</h1>
+    <p>A little kindness for every kind of day.</p>
+
+    <label for="name">What should I call you?</label>
+    <input id="name" placeholder="Enter your name">
+
+    <label for="mood">How are you feeling today?</label>
+    <select id="mood">
+      <option value="Happy">😊 Happy</option>
+      <option value="Sad">😔 Sad</option>
+      <option value="Stressed">😰 Stressed</option>
+      <option value="Angry">😡 Angry</option>
+      <option value="Loved">🥰 Loved</option>
+      <option value="Tired">😴 Tired</option>
+      <option value="Worried">😟 Worried</option>
+      <option value="Motivated">💪 Motivated</option>
+    </select>
+
+    <label for="feelings">Tell me what's on your mind</label>
+    <textarea id="feelings" rows="4"
+      placeholder="Share your feelings here..."></textarea>
+
+    <button id="send">Send my feelings 💌</button>
+    <div id="reply" hidden aria-live="polite"></div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById("name");
+    const savedName = localStorage.getItem("moodmate_name");
+
+    if (savedName) nameInput.value = savedName;
+
+    document.getElementById("send").addEventListener("click", async () => {
+      const name = nameInput.value.trim();
+      const mood = document.getElementById("mood").value;
+      const feelings = document.getElementById("feelings").value.trim();
+      const reply = document.getElementById("reply");
+      const button = document.getElementById("send");
+
+      if (!name) {
+        alert("Please enter your name first 💙");
+        nameInput.focus();
+        return;
+      }
+
+      localStorage.setItem("moodmate_name", name);
+      button.disabled = true;
+      button.textContent = "Sending kindness... 💙";
+      reply.hidden = false;
+      reply.textContent = "Preparing your encouragement...";
+
+      try {
+        const response = await fetch("/api", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, mood, feelings })
+        });
+
+        if (!response.ok) throw new Error("Request failed");
+
+        const data = await response.json();
+        reply.textContent = data.reply;
+      } catch (error) {
+        reply.textContent =
+          "Sorry, I couldn't respond right now. Please try again. 💙";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Send my feelings 💌";
+      }
+    });
+  </script>
+</body>
+</html>
